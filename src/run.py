@@ -1,6 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-
 """
 Author: Abubakar Saeed
 Created: January 2026
@@ -13,9 +10,6 @@ Description:
 
     This script initializes the processing environment, configures input/output paths,
     and invokes the integrated pipeline with parallel processing support.
-
-References:
-    Human Protein Atlas (HPA) test dataset: https://www.proteinatlas.org/
 """
 
 import sys
