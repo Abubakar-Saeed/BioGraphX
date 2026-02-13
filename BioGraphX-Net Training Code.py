@@ -38,10 +38,9 @@ warnings.filterwarnings('ignore')
 # ==========================================
 
 # Input data paths
-CSV_PATH = "/kaggle/input/embeddingdeeploc/SLM_Encoded_Frus.csv"
+CSV_PATH = "BioGraphXEncodedFeatures.csv"
 ESM_DIRS = [
-    "/kaggle/input/subcellular-localization-prediction-ml/esm_embeddings_ml/esm_embeddings_ml",
-    "/kaggle/input/subcellular-localization-prediction-ml/esm_embeddings__ml"
+    "esm_embeddings_ml/.npz"
 ]
 
 # MANUAL FOLD SELECTION: CHANGE FOR EACH CROSS-VALIDATION RUN
@@ -57,9 +56,7 @@ TARGET_COLS = [
 NUM_CLASSES = len(TARGET_COLS)
 
 # Metadata columns to exclude from feature matrix
-META_COLS = ['ACC', 'Kingdom_x', 'Kingdom_y', 'Partition_x', 'Partition_y', 
-             'Peripheral', 'Transmembrane', 'LipidAnchor', 'Soluble', 
-             'Unnamed: 15', 'Sequence'] + TARGET_COLS
+META_COLS = ['ACC', 'Kingdom', 'Partition', 'Sequence'] + TARGET_COLS
 
 # Hyperparameters
 BATCH_SIZE = 64
