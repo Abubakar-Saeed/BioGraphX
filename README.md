@@ -1,4 +1,4 @@
-# BioGraphX-RNA
+# BioGraphX
 [![DOI](https://img.shields.io/badge/DOI-10.64898%252F2026.01.21.700873-blue)](https://doi.org/10.64898/2026.01.21.700873)
 ![Python Version](https://img.shields.io/badge/Python-3.7+-blue.svg)
 ![License](https://img.shields.io/badge/License-Academic-blue.svg)
@@ -18,11 +18,11 @@
 ### 📊 Comprehensive Feature Extraction
 | Feature Category | Count | Description |
 | :--- | :---: | :--- |
-| **Graph Topology** | 85 | Degree stats, betweenness/closeness centrality, community modularity, and path efficiency |
-| **Hybrid Features** | 23 | Stacking-pairing hybrid tracking, regional hybrid density, and interaction energy stats |
-| **Knowledge Profiles** | 20 | Motif, hybrid, and GC compatibility scores for 9 subcellular compartments |
+| **Graph Topology** | 85 | Degree distributions, centrality measures (betweenness/closeness/eigenvector), community structure, path efficiency, clustering coefficients, regional densities |
+| **Hybrid Features** | 23 | Cooperative interaction scores, regional hybrid enrichment, co-occurrence patterns, network diversity metrics |
+| **Knowledge Profiles** | 20 | N-terminal signal features, C-terminal retention signals, basic cluster (NLS) detection, hydrophobic cluster (TM) prediction, charge gradients |
 | **Frustration Analysis** | 11 | Per-residue frustration, signal vs structural contrast, hotspot detection, satisfaction ratios, profile correlation |
-| **Global Physics** | 19 | GC/AU skew, MFE per nucleotide, dinucleotide bias, and pairing potential |
+| **Global Physics** | 19 | Isoelectric point (pI), GRAVY hydrophobicity, net charge, aromaticity, instability proxy, autocorrelation (hydrophobicity/charge lags 1-6), Shannon entropy |
 
 ---
 
