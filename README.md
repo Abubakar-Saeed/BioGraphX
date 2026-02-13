@@ -33,8 +33,7 @@ BioGraphX Pipeline
 ├── SequencePreprocessor (Motif-Preserving Truncation & Windowing)
 ├── MotifProfiler (Compartment-specific Localization Scoring)
 ├── GraphEngine (Residue Interaction Network Construction)
-├── FrustrationAnalyzer (Conformational Conflict Detection)
-└── BioGraphX_Hybrid_Improved (ESM + Physics Fusion with Adaptive Gates)
+└── FrustrationAnalyzer (Conformational Conflict Detection)
 
 ```
 ---
