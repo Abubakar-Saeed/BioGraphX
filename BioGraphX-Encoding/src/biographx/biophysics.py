@@ -130,7 +130,6 @@ class BioPhysicsStrategy:
         self.hybrid_interactions = {
             'salt_bridge_hbond': {'primary': 'salt_bridge', 'secondary': 'hydrogen_bond', 'weight': 1.2},
             'hydrophobic_pi': {'primary': 'hydrophobic', 'secondary': 'pi_interaction', 'weight': 1.1},
-            'disulfide_hbond': {'primary': 'disulfide', 'secondary': 'hydrogen_bond', 'weight': 1.3},
             'cation_pi_hbond_network': {'primary': 'cation_pi', 'secondary': 'hydrogen_bond', 'weight': 1.15},
             'hydrophobic_vdw_cluster': {'primary': 'hydrophobic', 'secondary': 'van_der_waals', 'weight': 1.05},
             'pi_cation_hbond': {'primary': 'pi_interaction', 'secondary': 'hydrogen_bond', 'weight': 1.1},
@@ -144,13 +143,13 @@ class BioPhysicsStrategy:
         self.localization_configs = {
             "Nucleus": {'expected_hybrids': ['salt_bridge_hbond', 'cation_pi_hbond_network', 'pi_cation_hbond']},
             "Mitochondrion": {'expected_hybrids': ['salt_bridge_hbond', 'hydrophobic_pi']},
-            "Extracellular": {'expected_hybrids': ['hydrophobic_pi', 'disulfide_hbond', 'hydrophobic_vdw_cluster']},
+            "Extracellular": {'expected_hybrids': ['hydrophobic_pi', 'hydrophobic_vdw_cluster']},
             "Cell.membrane": {'expected_hybrids': ['hydrophobic_pi', 'hydrophobic_vdw_cluster', 'ch_pi_hydrophobic']},
-            "Endoplasmic.reticulum": {'expected_hybrids': ['disulfide_hbond', 'carbonyl_charge_cluster']},
+            "Endoplasmic.reticulum": {'expected_hybrids': ['carbonyl_charge_cluster']},
             "Golgi.apparatus": {'expected_hybrids': ['hydrophobic_pi', 'sulfur_aromatic_network']},
             "Lysosome/Vacuole": {'expected_hybrids': ['salt_bridge_hbond', 'carbonyl_charge_cluster']},
             "Peroxisomal": {
-                'expected_hybrids': ['sulfur_aromatic_network', 'disulfide_hbond', 'carbonyl_charge_cluster']},
+                'expected_hybrids': ['sulfur_aromatic_network', 'carbonyl_charge_cluster']},
             "Plastid": {'expected_hybrids': ['hydrogen_bond', 'hydrophobic_pi', 'salt_bridge_hbond']},
             "Cytoplasm": {'expected_hybrids': ['salt_bridge_hbond', 'hydrogen_bond', 'hydrophobic_vdw_cluster']}
         }

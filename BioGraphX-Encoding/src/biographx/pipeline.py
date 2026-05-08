@@ -68,11 +68,11 @@ class BioGraphXPipeline:
         Computes configurational frustration metrics from constraint graphs.
 
     total_features : int
-        Total dimensionality of concatenated feature vector (158).
+        Total dimensionality of concatenated feature vector (157).
         Derived from:
         - Basic graph features: 85 dimensions
-        - Hybrid interaction features: 23 dimensions
-        - Knowledge profiles: 20 dimensions (2 scores × 10 compartments)
+        - Hybrid interaction features: 22 dimensions
+        - Targeting signal features: 20 dimensions (2 scores × 10 compartments)
         - Biophysical features: 19 dimensions
         - Frustration features: 11 dimensions
 
@@ -103,10 +103,10 @@ class BioGraphXPipeline:
         # -----------------------------------------------------------------
         # Feature Dimensionality
         # -----------------------------------------------------------------
-        # Total concatenated feature vector length (158 dimensions)
+        # Total concatenated feature vector length (157 dimensions)
         # This fixed-length representation ensures compatibility with
         # downstream classifiers regardless of input sequence length.
-        self.total_features = 158                               # 158 total features
+        self.total_features = 157                               # 157 total features
 
     # -------------------------------------------------------------------------
     # CORE FEATURE EXTRACTION ENGINE
@@ -133,7 +133,7 @@ class BioGraphXPipeline:
         Returns
         -------
         np.ndarray (dtype=np.float32)
-            Fixed-length feature vector of 158 dimensions. Guaranteed to be
+            Fixed-length feature vector of 157 dimensions. Guaranteed to be
             NaN-free with all values in valid numerical range.
 
         Notes
@@ -206,8 +206,8 @@ class BioGraphXPipeline:
         # -----------------------------------------------------------------
         # Step 9: Dimensionality Validation
         # -----------------------------------------------------------------
-        # Ensure exact feature count (158 = 147 + 11)
-        target_dim = 147 + 11
+        # Ensure exact feature count (157 = 146 + 11)
+        target_dim = 146 + 11
         if len(all_features) < target_dim:
             # Pad with zeros if insufficient features (should not occur in normal operation)
             print(f"[Warning] Feature padding: {target_dim - len(all_features)} zeros added")
@@ -312,7 +312,7 @@ class BioGraphXPipeline:
         Returns
         -------
         np.ndarray
-            Fixed-length feature vector (158 dimensions) regardless of input
+            Fixed-length feature vector (157 dimensions) regardless of input
             sequence length. Window aggregation ensures consistent dimensionality.
 
         Notes
@@ -388,7 +388,7 @@ class BioGraphXPipeline:
         Returns
         -------
         np.ndarray
-            Complete feature vector (158 dimensions) for the input sequence.
+            Complete feature vector (157 dimensions) for the input sequence.
 
         Notes
         -----
@@ -438,7 +438,7 @@ def run_integrated_pipeline(input_file: str, output_file: str,
     Execute complete BioGraphX feature extraction pipeline on large CSV datasets.
 
     This high-throughput function processes protein sequences from a CSV file,
-    extracts 158-dimensional feature vectors, and appends them to the original
+    extracts 157-dimensional feature vectors, and appends them to the original
     data while preserving all non-sequence columns. Implements chunked processing
     for memory efficiency and parallel execution for computational performance.
 
@@ -449,7 +449,7 @@ def run_integrated_pipeline(input_file: str, output_file: str,
         amino acid sequences. All other columns are preserved without modification.
     output_file : str
         Path to output CSV file. Will contain all original columns (excluding
-        Sequence) plus 158 feature columns named according to COMPLETE_FEATURE_NAMES.
+        Sequence) plus 157 feature columns named according to COMPLETE_FEATURE_NAMES.
     chunk_size : int, default=500
         Number of sequences to process per chunk. Lower values reduce memory
         usage at cost of I/O overhead.

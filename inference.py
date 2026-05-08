@@ -31,7 +31,7 @@ warnings.filterwarnings("ignore")
 # MODEL DEFINITION (exact architecture from training)
 # -------------------------------------------------------------------
 class BioGraphX_Hybrid_Improved(nn.Module):
-    def __init__(self, esm_dim=2560, biographx_dim=158, num_classes=11, shared_dim=1024):
+    def __init__(self, esm_dim=2560, biographx_dim=157, num_classes=11, shared_dim=1024):
         super().__init__()
         self.attn = nn.Sequential(
             nn.Linear(esm_dim, shared_dim),

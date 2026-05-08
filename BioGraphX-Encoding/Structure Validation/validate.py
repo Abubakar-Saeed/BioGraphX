@@ -9,18 +9,18 @@ from sklearn.metrics import (
 from scipy.stats import pearsonr
 
 # =====================
-# 1. Load data & define features (using last 158 columns)
+# 1. Load data & define features (using last 157 columns)
 # =====================
 train_df = pd.read_csv("/kaggle/input/datasets/abubakarsaeed1/biographx-psp-data/eSol_train_Encoded.csv")
 test_val_df = pd.read_csv("/kaggle/input/datasets/abubakarsaeed1/biographx-psp-data/eSol_test_Encoded.csv")
 
 target_col = 'solubility'
 
-# Use the LAST 158 columns as features (excludes 'solubility' and any ID/metadata columns)
-feature_cols = train_df.columns[-158:].tolist()
+# Use the LAST 157 columns as features (excludes 'solubility' and any ID/metadata columns)
+feature_cols = train_df.columns[-157:].tolist()
 
-# Verify we have exactly 158 features
-assert len(feature_cols) == 158, f"Expected 158 feature columns, got {len(feature_cols)}"
+# Verify we have exactly 157 features
+assert len(feature_cols) == 157, f"Expected 157 feature columns, got {len(feature_cols)}"
 
 # Store feature names for importance output
 FEATURE_NAMES = feature_cols

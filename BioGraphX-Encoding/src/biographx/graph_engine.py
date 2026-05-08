@@ -1076,7 +1076,7 @@ class GraphEngine:
 
     def extract_hybrid_features(self, graph: ig.Graph, hybrid_scores: Dict[str, float], sequence: str) -> np.ndarray:
         """
-        Extract 23-dimensional feature vector specific to hybrid interactions.
+        Extract 22-dimensional feature vector specific to hybrid interactions.
 
         Computes features describing the prevalence, distribution, and organization
         of hybrid interactions (edges satisfying multiple interaction types).
@@ -1087,7 +1087,7 @@ class GraphEngine:
             sequence: Amino acid sequence for regional analysis
 
         Returns:
-            np.ndarray: 23-element float32 feature vector encoding:
+            np.ndarray: 22-element float32 feature vector encoding:
                 - 9 raw hybrid scores (each hybrid type)
                 - 4 regional hybrid densities (N-term, C-term, hydrophobic, basic)
                 - 4 hybrid network properties (ratio, density, path length, components)
@@ -1097,7 +1097,7 @@ class GraphEngine:
         features = []
 
         if graph.ecount() == 0:
-            return np.zeros(23, dtype=np.float32)
+            return np.zeros(22, dtype=np.float32)
 
         # 1. Basic hybrid scores (9 features)
         for hybrid_type in self.biophysics.hybrid_interactions.keys():

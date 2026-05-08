@@ -194,7 +194,7 @@ class BioGraphX_Hybrid(nn.Module):
         - Classifier: Combined feature classification head
 
     """
-    def __init__(self, esm_dim=2560, biographx_dim=158, num_classes=11, shared_dim=1024):
+    def __init__(self, esm_dim=2560, biographx_dim=157, num_classes=11, shared_dim=1024):
         super().__init__()
         
         # -----------------------------------------------------------------

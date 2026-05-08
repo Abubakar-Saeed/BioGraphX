@@ -3,7 +3,7 @@
 ![Python Version](https://img.shields.io/badge/Python-3.7+-blue.svg)
 ![License](https://img.shields.io/badge/License-Academic-blue.svg)
 
-**BioGraphX** is a physicochemical graph encoding framework that converts protein sequences into explainable 158-dimensional biophysical feature vectors. It combines residue interaction graph modeling, hybrid interaction scoring, motif-based localization profiling, and frustration analysis for downstream classification and inference.
+**BioGraphX** is a physicochemical graph encoding framework that converts protein sequences into explainable 157-dimensional biophysical feature vectors. It combines residue interaction graph modeling, hybrid interaction scoring, motif-based localization profiling, and frustration analysis for downstream classification and inference.
 
 ---
 
@@ -89,7 +89,7 @@ run_integrated_pipeline(
 
 ### 3) Output format
 
-The output CSV preserves all original columns except `Sequence`. It appends 158 feature columns named according to the BioGraphX feature registry.
+The output CSV preserves all original columns except `Sequence`. It appends 157 feature columns named according to the BioGraphX feature registry.
 
 > Important: `Sequence` is used for encoding and is dropped from the output.
 
@@ -203,7 +203,7 @@ The `BioGraphX-Encoding/Structure Validation/` folder contains the cross-dataset
 
 ### Background
 
-To validate that BioGraphX graph encodings function as effective structural proxies, we benchmarked the standalone 158 features (no ESM embeddings, no deep learning) against fGNNSol , a state-of-the-art method that uses AlphaFold3-derived 3D structural features (~620 dimensions), ESM-C embeddings (1,152 dimensions), and a dual-stream GNN architecture. Despite using 11.6× fewer features and no 3D coordinates, BioGraphX achieves competitive recall (0.726 vs. 0.734) at the standard solubility threshold.
+To validate that BioGraphX graph encodings function as effective structural proxies, we benchmarked the standalone 157 features (no ESM embeddings, no deep learning) against fGNNSol [1], a state-of-the-art method that uses AlphaFold3-derived 3D structural features (~620 dimensions), ESM-C embeddings (1,152 dimensions), and a dual-stream GNN architecture. Despite using 11.6× fewer features and no 3D coordinates, BioGraphX achieves competitive recall (0.726 vs. 0.734) at the standard solubility threshold.
 
 ### Run Validation
 
@@ -215,7 +215,7 @@ python validate.py
 This script:
 
 * Loads the eSol benchmark dataset
-* Extracts 158 BioGraphX features from protein sequences
+* Extracts 157 BioGraphX features from protein sequences
 * Trains an XGBoost regressor with 5 random seeds (2024–2028)
 * Reports mean ± std for regression metrics (R², Pearson r, RMSE) and classification metrics (accuracy, precision, recall, F1, AUC, MCC)
 * Performs feature importance analysis on the best-performing seed
