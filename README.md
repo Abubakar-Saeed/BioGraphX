@@ -219,18 +219,11 @@ This script:
 * Trains an XGBoost regressor with 5 random seeds (2024–2028)
 * Reports mean ± std for regression metrics (R², Pearson r, RMSE) and classification metrics (accuracy, precision, recall, F1, AUC, MCC)
 * Performs feature importance analysis on the best-performing seed
-* Validates convergence with fGNNSol's reported biophysical determinants
 
 ### Reference
 
 [1] Song, W., Xu, B., Zhang, D., & Li, M. (2026). fGNNSol: A fused graph neural network with AlphaFold3 and ESM-C embeddings for accurate protein solubility prediction. Nature Machine Intelligence, 8, 120–132.
 
-
-## 🔧 Troubleshooting
-
-* `ModuleNotFoundError: No module named 'numpy'` — activate the virtual environment and reinstall requirements.
-* `CSV must contain an 'ACC' column` — add the `ACC` identifier column to your CSV.
-* `Model expects X features` — verify the physics feature CSV contains the expected number of BioGraphX columns.
 
 ---
 
