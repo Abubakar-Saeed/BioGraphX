@@ -104,7 +104,7 @@ Use `esm_embeddings.py` to produce per-protein `.npz` files for ESM embeddings.
 The script expects a CSV with columns:
 
 * `ACC` — unique protein identifier
-* `Sequence_main` — amino acid sequence
+* `Sequence` — amino acid sequence
 
 ### Configure the script
 
@@ -203,7 +203,7 @@ The `BioGraphX-Encoding/Structure Validation/` folder contains the cross-dataset
 
 ### Background
 
-To validate that BioGraphX graph encodings function as effective structural proxies, we benchmarked the standalone 157 features (no ESM embeddings, no deep learning) against fGNNSol [1], a state-of-the-art method that uses AlphaFold3-derived 3D structural features (~620 dimensions), ESM-C embeddings (1,152 dimensions), and a dual-stream GNN architecture. Despite using 11.6× fewer features and no 3D coordinates, BioGraphX achieves competitive recall (0.726 vs. 0.734) at the standard solubility threshold.
+To validate that BioGraphX graph encodings function as effective structural proxies, we benchmarked the standalone 157 features (no ESM embeddings, no deep learning) against fGNNSol, a state-of-the-art method that uses AlphaFold3-derived 3D structural features (~620 dimensions), ESM-C embeddings (1,152 dimensions), and a dual-stream GNN architecture. Despite using 11.6× fewer features and no 3D coordinates, BioGraphX achieves competitive recall (0.726 vs. 0.734) at the standard solubility threshold.
 
 ### Run Validation
 
