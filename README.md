@@ -187,7 +187,7 @@ If the model checkpoint uses a different number of classes than the default 11, 
 
 ## 🏋️ Model Weights
 
-Pre-trained model checkpoints for the BioGraphX_Hybrid_Improved architecture are included in the repository. These models were trained on the FGNNSol dataset for subcellular localization prediction.
+Pre-trained model checkpoints for the BioGraphX_Net architecture are included in the repository. These models were trained on the Deeploc2.0 dataset for subcellular localization prediction.
 
 Available checkpoints:
 * `model_fold_0.pth` — Best performing model from cross-validation fold 0
@@ -225,16 +225,6 @@ This script:
 
 [1] Song, W., Xu, B., Zhang, D., & Li, M. (2026). fGNNSol: A fused graph neural network with AlphaFold3 and ESM-C embeddings for accurate protein solubility prediction. Nature Machine Intelligence, 8, 120–132.
 
----
-
-## 🧩 Notes
-
-* `inference.py` will print a warning and use zero ESM embeddings for proteins without matching `.npz` files.
-* Make sure the `ACC` values in your feature CSV exactly match the `.npz` filenames.
-* `esm_embeddings.py` is GPU-intensive. Use a machine with at least one GPU for best performance.
-* If your model or dataset uses a different feature order, verify the physics feature CSV before inference.
-
----
 
 ## 🔧 Troubleshooting
 
