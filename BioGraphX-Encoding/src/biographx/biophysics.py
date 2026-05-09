@@ -80,7 +80,6 @@ class BioPhysicsStrategy:
             },
             'pi_interaction': {
                 'aromatic': ['F', 'Y', 'W'],
-                'positive': ['R', 'K', 'H'],
                 'strength': 0.6,
                 'max_distance': 15  # Linear sequence positions
             },
@@ -235,10 +234,7 @@ class BioPhysicsStrategy:
 
         elif interaction_type == 'pi_interaction':
             aromatic = set(rules['aromatic'])
-            positive = set(rules['positive'])
-            return (aa1 in aromatic and aa2 in aromatic) or \
-                (aa1 in aromatic and aa2 in positive) or \
-                (aa1 in positive and aa2 in aromatic)
+            return (aa1 in aromatic and aa2 in aromatic)
 
         elif interaction_type == 'disulfide':
             return aa1 in rules['residues'] and aa2 in rules['residues']
