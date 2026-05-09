@@ -104,7 +104,7 @@ Use `esm_embeddings.py` to produce per-protein `.npz` files for ESM embeddings.
 The script expects a CSV with columns:
 
 * `ACC` — unique protein identifier
-* `Sequence_main` — amino acid sequence
+* `Sequence` — amino acid sequence
 
 ### Configure the script
 
@@ -187,7 +187,7 @@ If the model checkpoint uses a different number of classes than the default 11, 
 
 ## 🏋️ Model Weights
 
-Pre-trained model checkpoints for the BioGraphX_Hybrid_Improved architecture are included in the repository. These models were trained on the FGNNSol dataset for subcellular localization prediction.
+Pre-trained model checkpoints for the BioGraphX_Net architecture are included in the repository. These models were trained on the Deeploc2.0 dataset for subcellular localization prediction.
 
 Available checkpoints:
 * `model_fold_0.pth` — Best performing model from cross-validation fold 0
@@ -203,7 +203,7 @@ The `BioGraphX-Encoding/Structure Validation/` folder contains the cross-dataset
 
 ### Background
 
-To validate that BioGraphX graph encodings function as effective structural proxies, we benchmarked the standalone 157 features (no ESM embeddings, no deep learning) against fGNNSol [1], a state-of-the-art method that uses AlphaFold3-derived 3D structural features (~620 dimensions), ESM-C embeddings (1,152 dimensions), and a dual-stream GNN architecture. Despite using 11.6× fewer features and no 3D coordinates, BioGraphX achieves competitive recall (0.726 vs. 0.734) at the standard solubility threshold.
+To validate that BioGraphX graph encodings function as effective structural proxies, we benchmarked the standalone 157 features (no ESM embeddings, no deep learning) against fGNNSol, a state-of-the-art method that uses AlphaFold3-derived 3D structural features (~620 dimensions), ESM-C embeddings (1,152 dimensions), and a dual-stream GNN architecture. Despite using 11.6× fewer features and no 3D coordinates, BioGraphX achieves competitive recall (0.726 vs. 0.734) at the standard solubility threshold.
 
 ### Run Validation
 
@@ -219,28 +219,11 @@ This script:
 * Trains an XGBoost regressor with 5 random seeds (2024–2028)
 * Reports mean ± std for regression metrics (R², Pearson r, RMSE) and classification metrics (accuracy, precision, recall, F1, AUC, MCC)
 * Performs feature importance analysis on the best-performing seed
-* Validates convergence with fGNNSol's reported biophysical determinants
 
 ### Reference
 
 [1] Song, W., Xu, B., Zhang, D., & Li, M. (2026). fGNNSol: A fused graph neural network with AlphaFold3 and ESM-C embeddings for accurate protein solubility prediction. Nature Machine Intelligence, 8, 120–132.
 
----
-
-## 🧩 Notes
-
-* `inference.py` will print a warning and use zero ESM embeddings for proteins without matching `.npz` files.
-* Make sure the `ACC` values in your feature CSV exactly match the `.npz` filenames.
-* `esm_embeddings.py` is GPU-intensive. Use a machine with at least one GPU for best performance.
-* If your model or dataset uses a different feature order, verify the physics feature CSV before inference.
-
----
-
-## 🔧 Troubleshooting
-
-* `ModuleNotFoundError: No module named 'numpy'` — activate the virtual environment and reinstall requirements.
-* `CSV must contain an 'ACC' column` — add the `ACC` identifier column to your CSV.
-* `Model expects X features` — verify the physics feature CSV contains the expected number of BioGraphX columns.
 
 ---
 
