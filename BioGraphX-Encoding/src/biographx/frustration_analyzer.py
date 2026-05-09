@@ -240,7 +240,7 @@ class FrustrationAnalyzer:
                 profile_scores[:min_len]
             )[0, 1] if min_len > 1 else 0
             # Negated so higher = stronger override potential
-            features['Frustration_ProfileCorrelation'] = -frustration_profile_correlation
+            features['Frustration_SignalCorrelation'] = -frustration_profile_correlation
 
         # 8. Binary flag for high signal region frustration
         # Used as direct input for classification branches
@@ -312,7 +312,7 @@ class FrustrationAnalyzer:
             'Frustration_Localization': 0.0,
             'Frustration_HotspotCount': 0,
             'Frustration_SatisfactionRatio': 0.0,
-            'Frustration_ProfileCorrelation': 0.0,
+            'Frustration_SignalCorrelation': 0.0,
             'Frustration_HighSignalFrustration': 0.0,
             'Frustration_PerResidue_Vector': np.zeros(100, dtype=np.float32)
         }

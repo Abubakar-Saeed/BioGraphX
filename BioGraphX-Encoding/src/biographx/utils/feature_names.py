@@ -338,7 +338,7 @@ FRUSTRATION_FEATURE_NAMES = [
     # -------------------------------------------------------------------------
     "Frustration_HotspotCount",  # Number of highly frustrated residues
     "Frustration_SatisfactionRatio",  # Proportion of minimally frustrated edges
-    "Frustration_ProfileCorrelation",  # Correlation with frustration reference profiles
+    "Frustration_Signal_Correlation",  # Correlation with frustration reference profiles
     "Frustration_HighSignalFrustration",  # Frustration enrichment in high-signal regions
     "Frustration_PerResidue_Mean"  # Global average frustration per residue
 ]
