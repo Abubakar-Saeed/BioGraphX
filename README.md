@@ -222,7 +222,7 @@ This script:
 
 ### Reference
 
-[1] Song, W., Xu, B., Zhang, D., & Li, M. (2026). fGNNSol: A fused graph neural network with AlphaFold3 and ESM-C embeddings for accurate protein solubility prediction. Nature Machine Intelligence, 8, 120–132.
+Song, G., et al. Protein Solubility Prediction Using Fused Graph Convolutional Networks and Improved Attention Networks with AlphaFold3-Derived Features. J. Chem. Inf. Model., 2025. DOI: 10.1021/acs.jcim.5c02262"
 
 
 ---
