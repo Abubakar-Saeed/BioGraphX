@@ -26,6 +26,7 @@ BioGraphX supports two main workflows:
 The repository contains:
 
 * `BioGraphX-Encoding/src/biographx/` — core feature extraction modules
+* `BioGraphX-Encoding/targeting_rules.py` — motif heuristics and targeting rules used by the localization profiler
 * `BioGraphX-Encoding/src/run.py` — example entrypoint for batch feature extraction
 * `inference.py` — prediction script for the trained BioGraphX_Hybrid_Improved model
 * `esm_embeddings.py` — script for generating `.npz` ESM embeddings
@@ -67,12 +68,14 @@ Q67890,MSYQGHGHHHKSGLSDLK,bar
 
 ### 2) Run the integrated pipeline
 
-The easiest option is to use `BioGraphX-Encoding/src/run.py`, but note this file uses hardcoded paths. Update `input_file` and `output_file` before running.
+Use `BioGraphX-Encoding/src/run.py` with command-line options to specify input and output file paths.
 
 ```powershell
 cd BioGraphX\BioGraphX-Encoding\src
-python run.py
+python run.py --input-file ..\biographx\data\hpa_testset.csv --output-file ..\biographx\processed_data\hpa_test_encoded.csv
 ```
+
+The pipeline also uses localization rules defined in `BioGraphX-Encoding/targeting_rules.py`, which provides the motif heuristics and canonical targeting patterns used by the `MotifProfiler` during feature extraction.
 
 Alternatively, use the pipeline directly from Python:
 

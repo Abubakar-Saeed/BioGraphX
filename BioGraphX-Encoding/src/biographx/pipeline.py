@@ -480,14 +480,14 @@ def run_integrated_pipeline(input_file: str, output_file: str,
         total_rows = sum(1 for _ in f) - 1
 
     print("=" * 70)
-    print("🧬 BIOGRAPHX INTEGRATED FEATURE EXTRACTION PIPELINE")
+    print("BIOGRAPHX INTEGRATED FEATURE EXTRACTION PIPELINE")
     print("=" * 70)
-    print(f"📊 Feature dimensionality: {len(COMPLETE_FEATURE_NAMES)}")
-    print(f"📈 Total sequences: {total_rows:,}")
-    print(f"⚡ Chunk size: {chunk_size}")
-    print(f"🔧 Parallel workers: {n_jobs}")
-    print(f"📁 Input: {input_file}")
-    print(f"📁 Output: {output_file}")
+    print(f"Feature dimensionality: {len(COMPLETE_FEATURE_NAMES)}")
+    print(f"Total sequences: {total_rows:,}")
+    print(f"Chunk size: {chunk_size}")
+    print(f"Parallel workers: {n_jobs}")
+    print(f"Input: {input_file}")
+    print(f"Output: {output_file}")
     print("=" * 70)
 
     # Initialize pipeline instance
@@ -546,7 +546,7 @@ def run_integrated_pipeline(input_file: str, output_file: str,
         total_processed += len(sequences)
         progress_pct = (total_processed / total_rows) * 100
         print(
-            f"\r📊 Progress: {progress_pct:.1f}% "
+            f"\rProgress: {progress_pct:.1f}% "
             f"| {total_processed:,}/{total_rows:,} "
             f"| Chunk {chunk_idx + 1}",
             end=""
@@ -559,15 +559,15 @@ def run_integrated_pipeline(input_file: str, output_file: str,
         del chunk, chunk_no_seq, batches, encoded_batches, encoded_vectors
         gc.collect()
 
-    print("\n\n✅ Pipeline execution complete!")
-    print(f"📁 Output saved to: {output_file}")
+    print("\n\nPipeline execution complete!")
+    print(f"Output saved to: {output_file}")
 
     # -----------------------------------------------------------------
     # Output Validation
     # -----------------------------------------------------------------
     # Perform sanity check on output file
     df_check = pd.read_csv(output_file, nrows=3)
-    print("\n🔍 Output validation:")
+    print("\nOutput validation:")
     print(f"   - Sequence column in output? {'Sequence' in df_check.columns} (should be False)")
     print(f"   - Total columns: {len(df_check.columns)}")
     print(f"   - Feature columns: {len(COMPLETE_FEATURE_NAMES)}")
