@@ -235,7 +235,7 @@ Song, G., et al. Protein Solubility Prediction Using Fused Graph Convolutional N
 If you use BioGraphX in your research, please cite:
 
 **BioGraphX:**
-Saeed, A., & Abbas, W. (2026). BioGraphX: Bridging the sequence–structure gap via physicochemical graph encoding for Interpretable subcellular localization prediction. https://doi.org/10.64898/2026.01.21.700873
+Saeed, A., & Abbas, W. (2026). BioGraphX: Bridging the sequence–structure gap via physicochemical graph encoding for Interpretable subcellular localization prediction. https://doi.org/10.1093/bioadv/vbag181
 
 
 
