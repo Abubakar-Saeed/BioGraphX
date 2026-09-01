@@ -33,6 +33,7 @@ Notes on Distance Metrics:
 ================================================================================
 """
 from typing import Dict,List
+import concurrent.futures
 
 from biographx.biophysics import BioPhysicsStrategy
 from biographx.preprocessor import SequencePreprocessor

@@ -7,12 +7,27 @@
 
 ---
 
-## 🚀 What’s New
+## 🚀 What's New
 
-* Added `inference.py` for BioGraphX+ESM hybrid model prediction
-* Added `esm_embeddings.py` for ESM embedding extraction from protein sequences
-* Added complete prediction workflow with model checkpoint inference
-* Updated documentation for end-to-end feature generation and inference
+**Added**
+* `BioGraphX_Training_Code.py` and `inference.py` are now callable two ways: a `--help`-documented CLI, and a plain importable function (`train_single_fold`, `run_inference`) for use from a notebook or another script.
+* `esm_embeddings.py` gained the same treatment — CLI flags (`--csv-path`, `--output-dir`, `--part`/`--total-parts`, ...) plus a Python-importable `extract_esm_embeddings()`.
+* Training now saves the fitted `StandardScaler` alongside each fold's checkpoint (`scaler_fold_{N}.pkl`), together with the exact feature-column list/order it was fit on.
+* A full **Training** walkthrough below — the training script existed before but was never documented in this README.
+
+**Fixed**
+* `inference.py` no longer fits a *new* `StandardScaler` on whatever CSV you're predicting on. It now loads the training-time scaler and its feature-column list, and reuses `BioGraphX_Hybrid` from `BioGraphX_Training_Code.py` directly instead of a second, hand-maintained copy of the architecture (`BioGraphX_Hybrid_Improved`) that could silently drift out of sync with it.
+* `pipeline.py`: `adaptive_extract_features()`'s sliding-window strategy (sequences >10,000 residues) used `concurrent.futures` without importing it — crashed every time that path was hit.
+* `graph_engine.py`: the zero-edge fallback in `extract_basic_graph_features()` padded with one too many zeros, which silently shifted every feature after it by one column for single-residue inputs (`len(interaction_rules) + 1` instead of `len(interaction_rules)`).
+* `esm_embeddings.py`: `collate_fn` closed over a local `tokenizer`, which crashes with `Can't pickle local object` the moment a `DataLoader` worker process is spawned (`num_workers>0`) — the default multiprocessing start method on Windows/macOS, and available on Linux too. This is unrelated to CPU vs. GPU; it fires regardless of which device the model itself runs on. Fixed by making `collate_fn` module-level, with each process (main and workers, via `worker_init_fn`) building its own tokenizer.
+* `esm_embeddings.py`: `np.array_split(df, total_parts)` returns plain `ndarray`s rather than DataFrames on current numpy/pandas, breaking the `df_part['ACC']` access right after. Now splits the row-index array and slices with `.iloc` instead.
+* `requirements.txt` was missing `torch`, `scikit-learn`, `transformers`, and `tqdm`, even though `BioGraphX_Training_Code.py`, `inference.py`, and `esm_embeddings.py` all import them.
+* Removed a dead `physics_bypass` submodule from `BioGraphX_Hybrid` — defined in `__init__`, never referenced in `forward()`.
+
+**Removed**
+* The previously-shipped pretrained checkpoints (`model-weights/model_fold_0.pth` ... `model_fold_4.pth`). They were trained against a 158-feature version of the encoder and are no longer compatible with the current 157-feature pipeline (confirmed from the checkpoints' own `phys_branch.0.weight` shape). Train fresh ones with `BioGraphX_Training_Code.py` — see **Training** below.
+
+Every fix above was verified end-to-end against synthetic data (encoded features → training a fold → inference on the resulting checkpoint) before being committed, not just read through.
 
 ---
 
@@ -28,7 +43,8 @@ The repository contains:
 * `BioGraphX-Encoding/src/biographx/` — core feature extraction modules
 * `BioGraphX-Encoding/targeting_rules.py` — motif heuristics and targeting rules used by the localization profiler
 * `BioGraphX-Encoding/src/run.py` — example entrypoint for batch feature extraction
-* `inference.py` — prediction script for the trained BioGraphX_Hybrid_Improved model
+* `BioGraphX_Training_Code.py` — trains the Gated Hybrid (physics + ESM) localization model, one cross-validation fold at a time
+* `inference.py` — prediction script for the trained Gated Hybrid model
 * `esm_embeddings.py` — script for generating `.npz` ESM embeddings
 
 ---
@@ -58,12 +74,12 @@ python -m pip install torch torchvision torchaudio scikit-learn tqdm transformer
 
 ### 1) Prepare input CSV
 
-Your input CSV must contain a `Sequence` column with amino acid sequences. Example:
+Your input CSV must contain a `Sequence` column with amino acid sequences. Any other columns (`ACC`, `Kingdom`, `Partition`, the 11 localization target columns, ...) are preserved as-is and carried through to the output — this is also the format `BioGraphX_Training_Code.py` expects downstream, so it's worth including `ACC` and `Partition` from the start if you're heading toward training. Example:
 
 ```csv
-ACC,Sequence,OtherMeta
-P12345,MKTIIALSYIFCLVFADYKDDDDK,foo
-Q67890,MSYQGHGHHHKSGLSDLK,bar
+ACC,Sequence,Kingdom,Partition,Cytoplasm,Nucleus,Extracellular,Cell membrane,Mitochondrion,Endoplasmic reticulum,Lysosome/Vacuole,Golgi apparatus,Peroxisome,Plastid,Membrane
+P12345,MKTIIALSYIFCLVFADYKDDDDK,Animal,0,1,0,0,0,0,0,0,0,0,0,0
+Q67890,MSYQGHGHHHKSGLSDLK,Plant,1,0,1,0,0,0,0,0,0,0,0,0
 ```
 
 ### 2) Run the integrated pipeline
@@ -72,7 +88,7 @@ Use `BioGraphX-Encoding/src/run.py` with command-line options to specify input a
 
 ```powershell
 cd BioGraphX\BioGraphX-Encoding\src
-python run.py --input-file ..\biographx\data\hpa_testset.csv --output-file ..\biographx\processed_data\hpa_test_encoded.csv
+python run.py --input-file path\to\proteins.csv --output-file path\to\BioGraphXEncodedFeatures.csv
 ```
 
 The pipeline also uses localization rules defined in `BioGraphX-Encoding/targeting_rules.py`, which provides the motif heuristics and canonical targeting patterns used by the `MotifProfiler` during feature extraction.
@@ -107,22 +123,22 @@ Use `esm_embeddings.py` to produce per-protein `.npz` files for ESM embeddings.
 The script expects a CSV with columns:
 
 * `ACC` — unique protein identifier
-* `Sequence` — amino acid sequence
-
-### Configure the script
-
-Open `esm_embeddings.py` and set:
-
-* `CSV_PATH` — path to your input CSV
-* `OUTPUT_DIR` — destination directory for `.npz` embeddings
-* `MODEL_NAME` — ESM model name (default: `facebook/esm2_t36_3B_UR50D`)
-* `PART_TO_RUN` / `TOTAL_PARTS` — use when splitting a very large dataset
-* `BATCH_SIZE` / `NUM_WORKERS` — tune for your machine
+* `Sequence_main` — amino acid sequence (override with `--sequence-col` if your CSV names it differently)
 
 ### Run embedding extraction
 
 ```powershell
-python esm_embeddings.py
+python esm_embeddings.py --csv-path proteins.csv --output-dir esm_embeddings_ml --batch-size 15
+```
+
+Split a large dataset across multiple runs/GPUs with `--part` / `--total-parts`, and see `python esm_embeddings.py --help` for the rest (`--model-name`, `--num-workers`, `--max-length`).
+
+Or call it directly from Python:
+
+```python
+from esm_embeddings import extract_esm_embeddings
+
+extract_esm_embeddings(csv_path="proteins.csv", output_dir="esm_embeddings_ml")
 ```
 
 ### Result
@@ -137,6 +153,44 @@ The `.npz` contains a compressed `embedding` array of shape `[sequence_length, 2
 
 ---
 
+## 🏋️ Training
+
+`BioGraphX_Training_Code.py` trains the Gated Hybrid model (biophysical features + ESM-2, fused with a learned per-sample gate) for one cross-validation fold, using the `Partition` column in the encoded CSV to hold that fold out for validation.
+
+```powershell
+python BioGraphX_Training_Code.py `
+  --csv-path BioGraphXEncodedFeatures.csv `
+  --esm-dirs esm_embeddings_ml `
+  --fold 0 `
+  --output-dir results\hybrid
+```
+
+Or directly from Python:
+
+```python
+from BioGraphX_Training_Code import train_single_fold
+
+results = train_single_fold(
+    fold_num=0,
+    csv_path="BioGraphXEncodedFeatures.csv",
+    esm_dirs=["esm_embeddings_ml"],
+    output_dir="results/hybrid",
+)
+```
+
+Each run writes, to `--output-dir`:
+
+* `best_model_fold_{N}.pth` — the checkpoint with the best validation MCC
+* `scaler_fold_{N}.pkl` — the `StandardScaler` fitted on the training split, plus the exact feature-column list/order it was fit on. **`inference.py` requires this** — a model trained on standardized features needs new data standardized the same way, not re-fit on whatever's being predicted.
+* `gate_history_fold_{N}.csv` — per-epoch physics/ESM gate means
+* `fold_{N}_results.csv` — final metrics (accuracy, Jaccard, micro/macro F1, per-class MCC, optimized thresholds)
+
+See `python BioGraphX_Training_Code.py --help` for the remaining hyperparameters (`--epochs`, `--batch-size`, `--lr`, `--physics-lr-multiplier`, `--gate-regularization-epochs`).
+
+No pretrained checkpoints are distributed in this repository; train the fold(s) you need with the command above.
+
+---
+
 ## 🧪 Prediction / Inference Workflow
 
 `inference.py` produces localization prediction probabilities and binary labels using the hybrid BioGraphX+ESM model.
@@ -146,9 +200,9 @@ The `.npz` contains a compressed `embedding` array of shape `[sequence_length, 2
 Your feature CSV must include:
 
 * `ACC` — unique protein identifier
-* physics feature columns extracted by BioGraphX
+* the physics feature columns extracted by BioGraphX
 
-`inference.py` automatically excludes known metadata and target columns, then uses the remaining columns as physics inputs.
+`inference.py` reads the exact feature-column list from `scaler_fold_{N}.pkl` (saved during training) rather than re-deriving it - it raises a clear error if any of those columns are missing from your CSV, instead of silently scoring on the wrong columns.
 
 ### 2) Prepare ESM embeddings
 
@@ -164,15 +218,30 @@ esm_dir_1/Q67890.npz
 ### 3) Run inference
 
 ```powershell
-python inference.py \
-  --csv_path /path/to/encoded_features.csv \
-  --esm_dirs /path/to/esm_dir_1 /path/to/esm_dir_2 \
-  --model_path /path/to/model_fold_0.pth \
-  --output predictions.csv \
-  --threshold 0.5 \
-  --batch_size 64 \
-  --device cuda
+python inference.py `
+  --csv-path /path/to/encoded_features.csv `
+  --esm-dirs /path/to/esm_dir_1 /path/to/esm_dir_2 `
+  --model-path /path/to/best_model_fold_0.pth `
+  --scaler-path /path/to/scaler_fold_0.pkl `
+  --output-csv predictions.csv `
+  --threshold 0.5 `
+  --batch-size 64
 ```
+
+Or directly from Python:
+
+```python
+from inference import run_inference
+
+df = run_inference(
+    csv_path="encoded_features.csv",
+    esm_dirs=["esm_dir_1", "esm_dir_2"],
+    model_path="best_model_fold_0.pth",
+    scaler_path="scaler_fold_0.pkl",
+)
+```
+
+Model dimensions (physics feature count, hidden size, number of classes) are recovered from the checkpoint's own weight shapes, and device (`cuda`/`cpu`) is auto-detected unless `--device`/`device=` is given.
 
 ### 4) Output columns
 
@@ -185,18 +254,6 @@ The inference output CSV contains:
 * `esm_gate` — learned ESM contribution weight
 
 If the model checkpoint uses a different number of classes than the default 11, generic columns `class_0`, `class_1`, ... are used.
-
----
-
-## 🏋️ Model Weights
-
-Pre-trained model checkpoints for the BioGraphX_Net architecture are included in the repository. These models were trained on the Deeploc2.0 dataset for subcellular localization prediction.
-
-Available checkpoints:
-* `model_fold_0.pth` — Best performing model from cross-validation fold 0
-* Additional folds available as needed
-
-Use these with `inference.py` for out-of-the-box predictions.
 
 ---
 

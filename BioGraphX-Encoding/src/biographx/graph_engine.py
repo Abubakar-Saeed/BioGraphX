@@ -324,7 +324,11 @@ class GraphEngine:
             features.append(interaction_counts.get('backbone', 0) / e)
 
         else:
-            features.extend([0.0] * (len(self.biophysics.interaction_rules) + 1))
+            # Matches the e>0 branch exactly: one ratio per interaction type
+            # (backbone included), not len(...)+1 - that extra zero was
+            # silently shifting every feature after this block by one column
+            # for edgeless (single-residue) graphs.
+            features.extend([0.0] * len(self.biophysics.interaction_rules))
 
         # 5. Centrality features
         centrality_features = self._extract_centrality(graph)

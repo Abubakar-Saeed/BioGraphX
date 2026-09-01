@@ -4,3 +4,10 @@ pandas==2.3.3
 psutil==7.2.1
 igraph==1.0.0
 scipy==1.14.1
+
+# Used by BioGraphX_Training_Code.py, inference.py, and esm_embeddings.py -
+# not previously listed here even though the scripts import them.
+torch>=2.0
+scikit-learn>=1.2
+transformers>=4.30
+tqdm>=4.65
