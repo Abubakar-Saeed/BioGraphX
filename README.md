@@ -7,45 +7,23 @@
 
 ---
 
-## 🚀 What's New
-
-**Added**
-* `BioGraphX_Training_Code.py` and `inference.py` are now callable two ways: a `--help`-documented CLI, and a plain importable function (`train_single_fold`, `run_inference`) for use from a notebook or another script.
-* `esm_embeddings.py` gained the same treatment — CLI flags (`--csv-path`, `--output-dir`, `--part`/`--total-parts`, ...) plus a Python-importable `extract_esm_embeddings()`.
-* Training now saves the fitted `StandardScaler` alongside each fold's checkpoint (`scaler_fold_{N}.pkl`), together with the exact feature-column list/order it was fit on.
-* A full **Training** walkthrough below — the training script existed before but was never documented in this README.
-
-**Fixed**
-* `inference.py` no longer fits a *new* `StandardScaler` on whatever CSV you're predicting on. It now loads the training-time scaler and its feature-column list, and reuses `BioGraphX_Hybrid` from `BioGraphX_Training_Code.py` directly instead of a second, hand-maintained copy of the architecture (`BioGraphX_Hybrid_Improved`) that could silently drift out of sync with it.
-* `pipeline.py`: `adaptive_extract_features()`'s sliding-window strategy (sequences >10,000 residues) used `concurrent.futures` without importing it — crashed every time that path was hit.
-* `graph_engine.py`: the zero-edge fallback in `extract_basic_graph_features()` padded with one too many zeros, which silently shifted every feature after it by one column for single-residue inputs (`len(interaction_rules) + 1` instead of `len(interaction_rules)`).
-* `esm_embeddings.py`: `collate_fn` closed over a local `tokenizer`, which crashes with `Can't pickle local object` the moment a `DataLoader` worker process is spawned (`num_workers>0`) — the default multiprocessing start method on Windows/macOS, and available on Linux too. This is unrelated to CPU vs. GPU; it fires regardless of which device the model itself runs on. Fixed by making `collate_fn` module-level, with each process (main and workers, via `worker_init_fn`) building its own tokenizer.
-* `esm_embeddings.py`: `np.array_split(df, total_parts)` returns plain `ndarray`s rather than DataFrames on current numpy/pandas, breaking the `df_part['ACC']` access right after. Now splits the row-index array and slices with `.iloc` instead.
-* `requirements.txt` was missing `torch`, `scikit-learn`, `transformers`, and `tqdm`, even though `BioGraphX_Training_Code.py`, `inference.py`, and `esm_embeddings.py` all import them.
-* Removed a dead `physics_bypass` submodule from `BioGraphX_Hybrid` — defined in `__init__`, never referenced in `forward()`.
-
-**Removed**
-* The previously-shipped pretrained checkpoints (`model-weights/model_fold_0.pth` ... `model_fold_4.pth`). They were trained against a 158-feature version of the encoder and are no longer compatible with the current 157-feature pipeline (confirmed from the checkpoints' own `phys_branch.0.weight` shape). Train fresh ones with `BioGraphX_Training_Code.py` — see **Training** below.
-
-Every fix above was verified end-to-end against synthetic data (encoded features → training a fold → inference on the resulting checkpoint) before being committed, not just read through.
-
----
-
 ## 🧠 Overview
 
-BioGraphX supports two main workflows:
+BioGraphX supports three workflows, in order:
 
 1. **Feature extraction** from protein sequences using the BioGraphX encoding pipeline
-2. **Hybrid inference** combining BioGraphX physics features with ESM embeddings via `inference.py`
+2. **ESM-2 embedding generation** for the evolutionary half of the hybrid model
+3. **Training and inference** with the Gated Hybrid model, which fuses BioGraphX physics features with ESM embeddings via a learned per-sample gate
 
 The repository contains:
 
-* `BioGraphX-Encoding/src/biographx/` — core feature extraction modules
+* `BioGraphX-Encoding/src/biographx/` — core feature extraction modules (`BioPhysicsStrategy`, `GraphEngine`, `FrustrationAnalyzer`, `SequencePreprocessor`, `MotifProfiler`, and the `BioGraphXPipeline` orchestrator)
 * `BioGraphX-Encoding/targeting_rules.py` — motif heuristics and targeting rules used by the localization profiler
-* `BioGraphX-Encoding/src/run.py` — example entrypoint for batch feature extraction
+* `BioGraphX-Encoding/src/run.py` — CLI entrypoint for batch feature extraction
 * `BioGraphX_Training_Code.py` — trains the Gated Hybrid (physics + ESM) localization model, one cross-validation fold at a time
-* `inference.py` — prediction script for the trained Gated Hybrid model
-* `esm_embeddings.py` — script for generating `.npz` ESM embeddings
+* `esm_embeddings.py` — generates per-protein `.npz` ESM-2 embeddings
+* `inference.py` — prediction script for a trained Gated Hybrid checkpoint
+* `BioGraphX-Encoding/Structure Validation/` — cross-dataset validation of BioGraphX features as structural proxies (see below)
 
 ---
 
@@ -63,7 +41,6 @@ python -m venv .venv
 .venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
-python -m pip install torch torchvision torchaudio scikit-learn tqdm transformers
 ```
 
 > If you want a CPU-only PyTorch install, use the official PyTorch CPU index from https://pytorch.org.
@@ -120,10 +97,7 @@ Use `esm_embeddings.py` to produce per-protein `.npz` files for ESM embeddings.
 
 ### Required input format
 
-The script expects a CSV with columns:
-
-* `ACC` — unique protein identifier
-* `Sequence_main` — amino acid sequence (override with `--sequence-col` if your CSV names it differently)
+The script expects a CSV with an accession column (default: `ACC`) and a sequence column (default: `Sequence_main`) — pass `--acc-col` / `--sequence-col` if your CSV names them differently.
 
 ### Run embedding extraction
 
@@ -143,7 +117,7 @@ extract_esm_embeddings(csv_path="proteins.csv", output_dir="esm_embeddings_ml")
 
 ### Result
 
-Each protein will be saved as:
+Each protein is saved as:
 
 ```text
 OUTPUT_DIR/<ACC>.npz
@@ -181,7 +155,7 @@ results = train_single_fold(
 Each run writes, to `--output-dir`:
 
 * `best_model_fold_{N}.pth` — the checkpoint with the best validation MCC
-* `scaler_fold_{N}.pkl` — the `StandardScaler` fitted on the training split, plus the exact feature-column list/order it was fit on. **`inference.py` requires this** — a model trained on standardized features needs new data standardized the same way, not re-fit on whatever's being predicted.
+* `scaler_fold_{N}.pkl` — the `StandardScaler` fitted on the training split, plus the exact feature-column list/order it was fit on (needed by `inference.py`)
 * `gate_history_fold_{N}.csv` — per-epoch physics/ESM gate means
 * `fold_{N}_results.csv` — final metrics (accuracy, Jaccard, micro/macro F1, per-class MCC, optimized thresholds)
 
@@ -193,7 +167,7 @@ No pretrained checkpoints are distributed in this repository; train the fold(s) 
 
 ## 🧪 Prediction / Inference Workflow
 
-`inference.py` produces localization prediction probabilities and binary labels using the hybrid BioGraphX+ESM model.
+`inference.py` produces localization prediction probabilities and binary labels using a trained Gated Hybrid checkpoint.
 
 ### 1) Prepare physics feature CSV
 
@@ -202,7 +176,7 @@ Your feature CSV must include:
 * `ACC` — unique protein identifier
 * the physics feature columns extracted by BioGraphX
 
-`inference.py` reads the exact feature-column list from `scaler_fold_{N}.pkl` (saved during training) rather than re-deriving it - it raises a clear error if any of those columns are missing from your CSV, instead of silently scoring on the wrong columns.
+`inference.py` reads the exact feature-column list from `scaler_fold_{N}.pkl` (saved during training) rather than re-deriving it, so it raises a clear error if any of those columns are missing from your CSV.
 
 ### 2) Prepare ESM embeddings
 
@@ -282,8 +256,7 @@ This script:
 
 ### Reference
 
-Song, G., et al. Protein Solubility Prediction Using Fused Graph Convolutional Networks and Improved Attention Networks with AlphaFold3-Derived Features. J. Chem. Inf. Model., 2025. DOI: 10.1021/acs.jcim.5c02262"
-
+Song, G., et al. Protein Solubility Prediction Using Fused Graph Convolutional Networks and Improved Attention Networks with AlphaFold3-Derived Features. J. Chem. Inf. Model., 2025. DOI: 10.1021/acs.jcim.5c02262
 
 ---
 
@@ -293,6 +266,3 @@ If you use BioGraphX in your research, please cite:
 
 **BioGraphX:**
 Saeed, A., & Abbas, W. (2026). BioGraphX: Bridging the sequence–structure gap via physicochemical graph encoding for Interpretable subcellular localization prediction. https://doi.org/10.1093/bioadv/vbag181
-
-
-
